@@ -15,7 +15,7 @@ use avian::prelude::*;
 use avian2d as avian;
 #[cfg(feature = "3d")]
 use avian3d as avian;
-use bevy::{app::RunFixedMainLoop, prelude::*, time::run_fixed_main_schedule};
+use bevy::{app::RunFixedMainLoop, prelude::*};
 
 /// Everything you need to interpolate transforms with Avian.
 pub mod prelude {
@@ -78,7 +78,7 @@ impl Plugin for AvianInterpolationPlugin {
                 AvianInterpolationVariableSystem::Interpolate,
                 AvianInterpolationVariableSystem::Last,
             )
-                .after(run_fixed_main_schedule)
+                .after(RunFixedMainLoopSystem::FixedMainLoop)
                 .chain(),
         );
     }
@@ -113,8 +113,8 @@ impl From<InterpolationMode> for InterpolateTransformFields {
 }
 
 /// The interpolation mode to use on a given transform field in [`InterpolateTransformFields`].
-#[derive(Debug, Default, Clone, Copy, Hash, Eq, PartialEq, Reflect)]
-#[reflect(Default, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, Hash, Eq, PartialEq, Component, Reflect)]
+#[reflect(Component, Default, PartialEq)]
 #[cfg_attr(
     feature = "serialize",
     derive(serde::Serialize, serde::Deserialize),

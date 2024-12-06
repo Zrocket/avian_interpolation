@@ -4,7 +4,7 @@ use avian3d::prelude::*;
 use avian_interpolation3d::prelude::*;
 use bevy::{
     app::RunFixedMainLoop, color::palettes::tailwind, input::mouse::MouseMotion, prelude::*,
-    render::camera::Viewport, time::run_fixed_main_schedule, window::WindowResized,
+    render::camera::Viewport, window::WindowResized,
 };
 
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             RunFixedMainLoop,
-            rotate_camera.before(run_fixed_main_schedule),
+            rotate_camera.before(RunFixedMainLoopSystem::FixedMainLoop),
         )
         .add_systems(FixedUpdate, follow_camera)
         .add_systems(Update, set_camera_viewports)
@@ -78,26 +78,31 @@ fn setup(
         commands
             .spawn((
                 TargetCamera(camera),
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.),
-                        height: Val::Percent(100.),
-                        ..default()
-                    },
+                Node {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     ..default()
                 },
             ))
             .with_children(|parent| {
-                parent.spawn(
-                    TextBundle::from_section(*camera_name, TextStyle::default()).with_style(
+                parent.spawn((
+                Text(camera_name.to_string()),
+                //PositionType::Absolute,
+                //UiRect {
+                //    top: Val::Px(12.),
+                //    left: Val::Px(12.),
+                //    ..default()
+                //},
+
+                /*TextBundle::from_section(*camera_name, TextStyle::default()).with_style(
                         Style {
                             position_type: PositionType::Absolute,
                             top: Val::Px(12.),
                             left: Val::Px(12.),
                             ..default()
                         },
-                    ),
-                );
+                    ),*/
+                ));
             });
 
         let interpolation_mode = if index == 0 {
@@ -112,11 +117,8 @@ fn setup(
         };
         commands.spawn((
             Name::new("Box"),
-            PbrBundle {
-                mesh: meshes.add(Mesh::from(box_shape)),
-                material,
-                ..default()
-            },
+            Mesh3d(meshes.add(Mesh::from(box_shape))),
+            MeshMaterial3d(material),
             RigidBody::Kinematic,
             Collider::from(box_shape),
             FollowCamera(camera),
@@ -141,11 +143,8 @@ fn setup(
     let ground_mesh = meshes.add(Cuboid::new(15.0, 0.25, 15.0));
     commands.spawn((
         Name::new("Ground"),
-        PbrBundle {
-            mesh: ground_mesh.clone(),
-            material: terrain_material.clone(),
-            ..default()
-        },
+        Mesh3d(ground_mesh.clone()),
+        MeshMaterial3d(terrain_material.clone()),
     ));
 
     // These are just here so we have something to look at.
@@ -159,12 +158,9 @@ fn setup(
     for (i, transform) in terrain_transforms.iter().enumerate() {
         commands.spawn((
             Name::new(format!("Wall {}", i)),
-            PbrBundle {
-                mesh: ground_mesh.clone(),
-                material: terrain_material.clone(),
-                transform: *transform,
-                ..default()
-            },
+            Mesh3d(ground_mesh.clone()),
+            MeshMaterial3d(terrain_material.clone()),
+            Transform::from(*transform),
         ));
     }
 }
@@ -225,7 +221,7 @@ fn follow_camera(
         // as the camera will update more frequently than the physics engine.
         // This means that the object will *always* lag slightly behind the camera.
         // To make this less jarring, we can run some nice additional nonlinear interpolation.
-        let dt = time.delta_seconds();
+        let dt = time.delta_secs();
         let decay_rate = f32::ln(1000.0);
         let alpha = 1.0 - f32::exp(-decay_rate * dt);
 

@@ -1,7 +1,7 @@
 use avian3d::prelude::*;
 use avian_interpolation3d::prelude::*;
 use bevy::{
-    app::RunFixedMainLoop, color::palettes::tailwind, prelude::*, time::run_fixed_main_schedule,
+    app::RunFixedMainLoop, color::palettes::tailwind, prelude::*, render::mesh, 
 };
 
 mod util;
@@ -18,7 +18,7 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             RunFixedMainLoop,
-            handle_input.before(run_fixed_main_schedule),
+            handle_input.before(RunFixedMainLoopSystem::FixedMainLoop),
         )
         .add_systems(FixedUpdate, clear_accumulated_input)
         .add_systems(Update, follow_target.chain())
@@ -73,12 +73,9 @@ fn setup(
             let z = j as f32 * tile_spacing;
             commands.spawn((
                 Name::new("Background Tile"),
-                PbrBundle {
-                    mesh: tile_mesh.clone(),
-                    material: pillar_material.clone(),
-                    transform: Transform::from_xyz(x, -1.5, z),
-                    ..default()
-                },
+                Mesh3d(tile_mesh.clone()),
+                MeshMaterial3d(pillar_material.clone()),
+                Transform::from_xyz(x, -1.5, z),
             ));
         }
     }
@@ -86,12 +83,9 @@ fn setup(
     let box_shape = Cuboid::from_size(Vec3::splat(0.5));
     commands.spawn((
         Name::new("Box"),
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(box_shape)),
-            material: prop_material.clone(),
-            transform: Transform::from_xyz(0.0, 1.5, 0.0),
-            ..default()
-        },
+        Mesh3d(meshes.add(Mesh::from(box_shape))),
+        MeshMaterial3d(prop_material.clone()),
+        Transform::from_xyz(0.0, 1.5, 0.0),
         RigidBody::Kinematic,
         Collider::from(box_shape),
         AccumulatedInput::default(),

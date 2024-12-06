@@ -4,8 +4,6 @@ use bevy::{
     app::RunFixedMainLoop,
     color::palettes::tailwind,
     prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-    time::run_fixed_main_schedule,
 };
 
 mod util;
@@ -21,7 +19,7 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             RunFixedMainLoop,
-            handle_input.before(run_fixed_main_schedule),
+            handle_input.before(RunFixedMainLoopSystem::FixedMainLoop),
         )
         .add_systems(FixedUpdate, clear_accumulated_input)
         .add_systems(Update, follow_target)
@@ -38,7 +36,7 @@ fn setup(
 
     commands.spawn((Name::new("Player Camera"), Camera2dBundle::default()));
 
-    let tile_mesh = Mesh2dHandle(meshes.add(Rectangle::from_size(Vec2::splat(200.0))));
+    let tile_mesh = meshes.add(Rectangle::from_size(Vec2::splat(200.0)));
 
     // Take a look at this reference background while running the example to see the effect of the interpolation.
     let tile_repeat_per_quadrant = 10;
@@ -49,13 +47,9 @@ fn setup(
             let y = j as f32 * tile_spacing;
             commands.spawn((
                 Name::new("Background Tile"),
-                MaterialMesh2dBundle {
-                    mesh: tile_mesh.clone(),
-                    material: pillar_material.clone(),
-                    // draw this behind the box
-                    transform: Transform::from_xyz(x, y, -1.0),
-                    ..default()
-                },
+                Mesh2d(tile_mesh.clone()),
+                MeshMaterial2d(pillar_material.clone()),
+                Transform::from_xyz(x, y, -1.0),
             ));
         }
     }
@@ -63,11 +57,8 @@ fn setup(
     let box_shape = Rectangle::from_size(Vec2::splat(50.));
     commands.spawn((
         Name::new("Box"),
-        MaterialMesh2dBundle {
-            mesh: meshes.add(box_shape).into(),
-            material: prop_material.clone(),
-            ..default()
-        },
+        Mesh2d(meshes.add(box_shape)),
+        MeshMaterial2d(prop_material.clone()),
         RigidBody::Kinematic,
         Collider::from(box_shape),
         AccumulatedInput::default(),

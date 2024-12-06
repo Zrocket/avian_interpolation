@@ -14,7 +14,7 @@ pub fn plugin(example: Example) -> impl Plugin {
                 )
                     .chain(),
             );
-        app.observe(add_interpolation_mode);
+        app.add_observer(add_interpolation_mode);
     }
 }
 
@@ -69,24 +69,23 @@ struct InstructionText;
 fn spawn_text(example: Example) -> impl Fn(Commands) {
     move |mut commands: Commands| {
         commands
-            .spawn(NodeBundle {
-                style: Style {
-                    position_type: PositionType::Absolute,
-                    bottom: Val::Px(12.0),
-                    left: Val::Px(12.0),
-                    ..default()
-                },
+            .spawn(Node {
+                position_type: PositionType::Absolute,
+                bottom: Val::Px(12.0),
+                left: Val::Px(12.0),
                 ..default()
             })
             .with_children(|parent| {
                 let text = |val: &str| {
-                    TextSection::new(
+                    Text::new(val)
+
+                    /*TextSection::new(
                         val,
                         TextStyle {
                             font_size: 25.0,
                             ..default()
                         },
-                    )
+                    )*/
                 };
                 let sections = match example {
                     Example::Generic => vec![
@@ -99,10 +98,10 @@ fn spawn_text(example: Example) -> impl Fn(Commands) {
                         "Current interpolation mode: ",
                     ],
                 };
-                parent.spawn((
-                    TextBundle::from_sections(sections.into_iter().map(text)),
-                    InstructionText,
-                ));
+                //parent.spawn((
+                    //TextBundle::from_sections(sections.into_iter().map(text)),
+                //    InstructionText,
+                //));
             });
     }
 }
@@ -120,7 +119,8 @@ fn update_text(
         InterpolationMode::None => unreachable!("Not shown in this example."),
     };
     for mut text in &mut texts {
-        text.sections.last_mut().unwrap().value =
+        //text.sections.last_mut().unwrap().value =
+        text.0 = 
             format!("Current interpolation mode: {interpolated}");
     }
 }

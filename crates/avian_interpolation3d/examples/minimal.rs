@@ -47,12 +47,11 @@ fn setup(
     let box_shape = Cuboid::from_size(Vec3::splat(1.0));
     commands.spawn((
         Name::new("Box"),
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(box_shape)),
-            material: materials.add(Color::from(tailwind::EMERALD_300)),
-            transform: Transform::from_xyz(0.0, 0.0, -5.),
-            ..default()
-        },
+
+        Mesh3d(meshes.add(Mesh::from(box_shape))),
+        MeshMaterial3d(materials.add(Color::from(tailwind::EMERALD_300))),
+        Transform::from_xyz(0.0, 0.0, -5.),
+
         RigidBody::Kinematic,
         Collider::from(box_shape),
         Moving,
@@ -60,7 +59,7 @@ fn setup(
 }
 
 fn move_box(time: Res<Time>, mut moving: Query<&mut Position, With<Moving>>) {
-    let elapsed = time.elapsed_seconds();
+    let elapsed = time.elapsed_secs();
     let max_offset = 1.7;
     let oscillations_per_second = 0.6;
     for mut position in &mut moving {

@@ -4,8 +4,8 @@ use crate::{
 };
 
 pub(super) fn plugin(app: &mut App) {
-    app.observe(insert_previous_position)
-        .observe(remove_previous_transform);
+    app.add_observer(insert_previous_position)
+        .add_observer(remove_previous_transform);
 }
 
 fn insert_previous_position(
