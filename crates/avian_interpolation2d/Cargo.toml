@@ -34,7 +34,8 @@ bench = false
 serde = { version = "1.0.210", optional = true}
 
 [dependencies.avian2d]
-git = "https://github.com/Jondolf/avian"
+#git = "https://github.com/Jondolf/avian"
+version = "0.2"
 default-features = false
 features = [
     "2d",
@@ -46,4 +47,4 @@ default-features = false
 
 [dev-dependencies]
 bevy = { version = "0.15", features = ["dynamic_linking"] }
-avian2d = { git = "https://github.com/Jondolf/avian" }
+avian2d = "0.2"
